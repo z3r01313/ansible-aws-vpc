@@ -18,5 +18,5 @@
       register: vpcout
 
      - name: Printing the Output of 'vpcout' variable to be used as reference in 'vpc_id'
-         debug:
-            var: vpcout
+       debug:
+          var: vpcout
