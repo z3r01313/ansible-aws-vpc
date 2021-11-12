@@ -20,3 +20,82 @@
     - name: Printing the Output of 'vpcout' variable to be used as reference in 'vpc_id'
       debug:
         var: vpcout
+
+    - name: create Public Subnet-1 in zone1
+      ec2_vpc_subnet:                             #Module Name for creating Subnets is 'ec2_vpc_subnet'
+        vpc_id: "{{ vpcout.vpc.id }}"             #From debugging 'vpcout' Variable
+        region: "{{ region }}"
+        az: "{{ zone1 }}"                         #Putting First Public Subnet in us-east-2a
+        state: "{{ state }}"
+        cidr: "{{ PubSub1Cidr }}"
+        map_public: yes                           #Map Public IP to the Subnet
+        resource_tags:                            #'resource_tags' keyword for Tagging
+          Name: vprofile-pubsub1
+      register: pubsub1_out                       #Storing Output in a Variable called 'vprofile-pubsub1'
+
+
+    - name: create Public Subnet-2 in zone2       #Same as above just the 'Subnet-<>' & 'zone<>' change
+      ec2_vpc_subnet:
+        vpc_id: "{{ vpcout.vpc.id }}"
+        region: "{{ region }}"
+        az: "{{ zone2 }}"                         #zone2 here
+        state: "{{ state }}"
+        cidr: "{{ PubSub2Cidr }}"                 #PubSub2Cidr here
+        map_public: yes
+        resource_tags:
+          Name: vprofile-pubsub2                  #vprofile-pubsub2 here
+      register: pubsub2_out                       #Storing the Output in 'pubsub2_out' Variable
+
+
+    - name: create Public Subnet-3 in zone3
+      ec2_vpc_subnet:
+        vpc_id: "{{ vpcout.vpc.id }}"
+        region: "{{ region }}"
+        az: "{{ zone3 }}"                         #zone3 here
+        state: "{{ state }}"
+        cidr: "{{ PubSub3Cidr }}"                 #PubSub3Cidr here
+        map_public: yes
+        resource_tags:
+          Name: vprofile-pubsub3                  #vprofile-pubsub3 here
+      register: pubsub3_out                       #Storing the Output in 'pubsub3_out' Variable
+
+
+#Creating Private Subnets across 3 Distributed Zones
+#NOTE THAT: NO 'map_public' attribute is passed in Private Subnets [Rest remains the same]
+    - name: create Private Subnet-1 in zone1
+      ec2_vpc_subnet:
+        vpc_id: "{{ vpcout.vpc.id }}"
+        region: "{{ region }}"
+        az: "{{ zone1 }}"                         #zone1 here
+        state: "{{ state }}"                      #NO 'map_public' attribute here
+        cidr: "{{ PrivSub1Cidr }}"                #Priv CIDR here
+        map_public: yes
+        resource_tags:
+          Name: vprofile-privsub1                 #Change the Tag to 'privsub1'
+      register: privsub1_out                      #Change the Variable to 'privsub1'
+
+
+    - name: create Private Subnet-2 in zone2
+      ec2_vpc_subnet:
+        vpc_id: "{{ vpcout.vpc.id }}"
+        region: "{{ region }}"
+        az: "{{ zone2 }}"
+        state: "{{ state }}"
+        cidr: "{{ PrivSub2Cidr }}"
+        map_public: yes
+        resource_tags:
+          Name: vprofile-privsub2
+      register: privsub2_out
+
+
+    - name: create Private Subnet-3 in zone3
+      ec2_vpc_subnet:
+        vpc_id: "{{ vpcout.vpc.id }}"
+        region: "{{ region }}"
+        az: "{{ zone3 }}"
+        state: "{{ state }}"
+        cidr: "{{ PrivSub3Cidr }}"
+        map_public: yes
+        resource_tags:
+          Name: vprofile-privsub3
+      register: privsub3_out
