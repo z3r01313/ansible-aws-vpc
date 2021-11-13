@@ -99,3 +99,31 @@
         resource_tags:
           Name: vprofile-privsub3
       register: privsub3_out
+
+
+    - name: Internet Gateway Setup
+      ec2_vpc_igw:                                  #Module for Igw is 'ec2_vpc_igw'
+        vpc_id: "{{ vpcout.vpc.id }}"
+        region: "{{ region }}"
+        state: "{{ state }}"
+        resource_tags:                              #'resource_tags' can be different for every module
+          Name: vprofile_IGW
+      register: igw_out                             #Storing output in a Variable 'igw_out'
+
+
+#Creating Route Table -> Igw is for PUBLIC SUBNET TO ROUTE TRAFFIC however, ROUTE TABLE will tell the PUBLIC SUBNET TO GO & ACCESS THIS IGW
+    - name: Set up Public Subnet Route Table
+      ec2_vpc_route_table:
+        vpc_id: "{{ vpcout.vpc.id }}"
+        region: "{{ region }}"
+        tags:
+          Name: VProfile-PubRT
+        subnets:                                     #LIST[] of Subnets to be associated with the Route Table
+          - "{{ pubsub1_out.subnet.id }}"            #pubsub1_out has a key called 'subnet'
+          - "{{ pubsub2_out.subnet.id }}"
+          - "{{ pubsub3_out.subnet.id }}"
+
+        routes:                                       #Will tell where the Traffic should be Routed & is a LIST[]
+          - dest: 0.0.0.0/0                           #All the traffic is routed to 'gateway_id'
+            gateway_id: "{{ igw_out.gateway_id }}"    #Inside 'igw_out' there is a key called 'gateway_id'
+      register: pubRT_out
